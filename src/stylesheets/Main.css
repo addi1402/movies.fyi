@@ -18,16 +18,16 @@ main {
 }
 
 .toggle-button {
-  border: none;
-  background-color: transparent;
-  margin-bottom: 1rem;
-  background-color: #d3d8db;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.1rem;
-  border-radius: 100%;
-}
+    border: none;
+    background-color: #d3d8db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.1rem;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+  }  
 
 ul {
   display: grid;
@@ -59,16 +59,37 @@ ul {
 }
 
 .stat-box{
-    background-color: #dde4e8;
+    background-color: #6e7e86;
     position: absolute;
     top: 0;
     left: 0;
     width: calc(100% - 40px);
     border-radius: 10px;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    color: white;
 }
 
 .stat-box div:first-child{
     display: flex;
     justify-content: space-between;
+}
+
+.stat-box div:nth-child(2){
+    display: flex;
+    gap:0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #c4d2d9;
+}
+
+#watched-movie-info{
+    font-size: 0.85rem;
+    align-items: start;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    color: #5d6f78;
 }

@@ -2,55 +2,14 @@ import React from "react";
 import "../stylesheets/Main.css";
 import { GoPlus } from "react-icons/go";
 import { GoDash } from "react-icons/go";
-import { GoCalendar } from "react-icons/go";
 
-const movies = [
-  {
-    name: "Inception",
-    imdb: "tt1375666",
-    posterUrl:
-      "https://www.mockofun.com/wp-content/uploads/2019/10/movie-poster-credits-178.jpg",
-    year: 2010,
-    watchTimeMinutes: 148,
-    rating: 8.8,
-  },
-  {
-    name: "The Dark Knight",
-    imdb: "tt0468569",
-    posterUrl:
-      "https://www.mockofun.com/wp-content/uploads/2019/10/movie-poster-credits-178.jpg",
-    year: 2008,
-    watchTimeMinutes: 152,
-    rating: 9.0,
-  },
-  {
-    name: "Interstellar",
-    imdb: "tt0816692",
-    posterUrl:
-      "https://www.mockofun.com/wp-content/uploads/2019/10/movie-poster-credits-178.jpg",
-    year: 2014,
-    watchTimeMinutes: 169,
-    rating: 8.6,
-  },
-  {
-    name: "The Shawshank Redemption",
-    imdb: "tt0111161",
-    posterUrl:
-      "https://www.mockofun.com/wp-content/uploads/2019/10/movie-poster-credits-178.jpg",
-    year: 1994,
-    watchTimeMinutes: 142,
-    rating: 9.3,
-  },
-  {
-    name: "The Godfather",
-    imdb: "tt0068646",
-    posterUrl:
-      "https://www.mockofun.com/wp-content/uploads/2019/10/movie-poster-credits-178.jpg",
-    year: 1972,
-    watchTimeMinutes: 175,
-    rating: 9.2,
-  },
-];
+
+function average(arr, type) {
+  let total = arr.reduce((a, c) => a + (type === 'ratings' ? c.rating : c.watchTimeMinutes), 0);
+  let avg = total / arr.length;
+  console.log(avg);
+  return avg;
+}
 
 function Toggle({ isOpen, setIsOpen }) {
   return (
@@ -60,64 +19,116 @@ function Toggle({ isOpen, setIsOpen }) {
   );
 }
 
-export default function Main() {
+export default function Main({movieList}) {
   return (
     <main>
-      <ListBox />
-      <WatchedBox />
+      <ListBox movieList={movieList}/>
+      <WatchedBox movieList={movieList}/>
     </main>
   );
 }
 
-function ListBox() {
+function ListBox({movieList}) {
   const [isOpen, setIsOpen] = React.useState(true);
-  return (
+   return (
     <div className="box">
-      <div style={{display:'flex', justifyContent:'space-between'}}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "1rem",
+        }}
+      >
         <h3>Movie Listings</h3>
         <Toggle isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
 
-      {isOpen ? <MovieList /> : null}
+      {isOpen ? <MovieList movieList={movieList}/> : null}
     </div>
   );
 }
 
-function WatchedBox() {
-  const [isOpen, setIsOpen] = React.useState(true);
-  return (
-    <div className="box">
-      <div className="stat-box">
-        <div>
-          <h5>MOVIES YOU WATCHED</h5>
-          <Toggle isOpen={isOpen} setIsOpen={setIsOpen}/>
-        </div>
-      </div>
-      {isOpen ? <MovieList /> : null}
-    </div>
-  );
-}
-
-function MovieList() {
+function MovieList({movieList}) {
   return (
     <ul>
-      {movies.map((movie) => (
-        <Movie key={movie.imdb} posterUrl={movie.posterUrl} name={movie.name}>
-          <div className="details">
-            <h4>{movie.name}</h4>
-              <span id="year">📆 {movie.year}</span>      
-          </div>
-        </Movie>
+      {movieList.map((movies) => (
+        <Movie
+          key={movies.imdb}
+          posterUrl={movies.posterUrl}
+          name={movies.name}
+          year={movies.year}
+        />
       ))}
     </ul>
   );
 }
 
-function Movie({ key, posterUrl, name, children }) {
+function Movie({ key, posterUrl, name, year }) {
   return (
     <li className="movie" key={key}>
       <img src={posterUrl} alt={name} />
-      {children}
+      <div className="details">
+        <h4>{name}</h4>
+        <span id="year">📆 {year}</span>
+      </div>
     </li>
   );
+}
+
+function WatchedBox({movieList}) {
+  let [watchedMovieList, setWatchedMovieList] = React.useState(movieList);
+  const [isOpen, setIsOpen] = React.useState(true);
+  return (
+    <div className="box">
+      <StatBox isOpen={isOpen} setIsOpen={setIsOpen} watchedMovieList={watchedMovieList}/>
+      <div style={{ marginBottom: "80px" }}></div>
+      {isOpen ? <WatchedMovieList watchedMovieList={watchedMovieList}/> : null}
+    </div>
+  );
+}
+
+function StatBox({isOpen, setIsOpen, watchedMovieList, setWatchedMovieList}) {
+  return (
+    <div className="stat-box">
+      <div>
+        <h5>MOVIES YOU WATCHED</h5>
+        <Toggle isOpen={isOpen} setIsOpen={setIsOpen} />
+      </div>
+      <div>
+        <span>#️⃣ {watchedMovieList.length} movies</span>
+        <span>⭐ {average(watchedMovieList,'ratings')}</span>
+        <span>🌟 9.5</span>
+        <span>⏳ {average(watchedMovieList,'timings')} mins</span>
+      </div>
+    </div>
+  );
+}
+
+function WatchedMovieList({watchedMovieList}){
+  return(<ul>
+    {watchedMovieList.map((movie) => (
+      <WatchedMovie
+        key={movie.imdb}
+        posterUrl={movie.posterUrl}
+        name={movie.name}
+        year={movie.year}
+        rating={movie.rating}
+        watchTimeMinutes={movie.watchTimeMinutes}
+      />
+    ))}
+  </ul>);
+}
+
+function WatchedMovie({ key, posterUrl, name, year, rating, watchTimeMinutes }){
+  return <li className="movie" key={key}>
+      <img src={posterUrl} alt={name} />
+      <div className="details">
+        <h4>{name}</h4>
+        <span id="watched-movie-info">
+          <span>⭐ {rating}</span>
+          <span>📆 {year}</span>
+          <span>⏳ {watchTimeMinutes} mins</span>
+        </span>
+      </div>
+    </li>
 }
