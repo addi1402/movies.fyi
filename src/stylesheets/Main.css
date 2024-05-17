@@ -33,7 +33,8 @@ main {
 ul {
   display: grid;
   grid-template-columns: auto auto;
-  row-gap: 20px;
+  row-gap: 10px;
+  column-gap: 10px;
 }
 
 .switch {
@@ -44,6 +45,13 @@ ul {
 .movie {
   display: flex;
   gap: 0.7rem;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.movie:hover{
+  background-color: #dde4e8;
+  cursor: pointer;
 }
 
 #year {
@@ -56,7 +64,7 @@ ul {
 }
 
 .movie img {
-  width: 45%;
+  width: 40%;
   border-radius: 7px;
 }
 
@@ -94,4 +102,31 @@ ul {
     flex-direction: column;
     gap: 0.5rem;
     color: #5d6f78;
+}
+
+.back-btn{
+  color: #5d6f78;
+  background-color: #d3d8db;
+  width: fit-content;
+  display: flex;
+  padding: 5px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.movie-details{
+  margin-top: 1.12rem;
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.movie-details img{
+  width: 35%;
+}
+
+.detail-box{
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
 }

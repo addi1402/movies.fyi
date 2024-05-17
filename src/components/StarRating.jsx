@@ -3,11 +3,18 @@ import { GoStar } from "react-icons/go";
 import { GoStarFill } from "react-icons/go";
 import React from "react";
 
+const comments = [
+  "Terrible",
+  "Poor",
+  "Average",
+  "Good",
+  "Excellent"
+];
+
 export default function StarRating({
   maxRating = 5,
   color = "gray",
   className = "",
-  comments,
 }) {
   const [score, setScore] = React.useState(1);
   const [hoverScore, setHoverScore] = React.useState(null);

@@ -113,7 +113,7 @@ export default function App() {
       <Navbar query={query} setQuery={setQuery} handleChange={handleChange}>
         <Stats movieList={movieList} />
       </Navbar>
-      <Main watchedMovieList={watchedMovieList} selectedID={selectedID}>
+      <Main watchedMovieList={watchedMovieList} selectedID={selectedID} setSelectedID={setSelectedID}>
         <ListBox>
           {isLoading ? (
             <Loader/>
@@ -128,6 +128,6 @@ export default function App() {
   );
 }
 
-function Loader(){
+export function Loader(){
   return <p>Loading Movies!</p>;
 }
