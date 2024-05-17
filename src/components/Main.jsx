@@ -1,13 +1,12 @@
+/* eslint-disable no-unreachable */
 import React from "react";
 import "../stylesheets/Main.css";
 import { GoPlus } from "react-icons/go";
 import { GoDash } from "react-icons/go";
 
-
-function average(arr, type) {
-  let total = arr.reduce((a, c) => a + (type === 'ratings' ? c.rating : c.watchTimeMinutes), 0);
+function average(arr, fn) {
+  let total = arr.reduce((a, c) => a + fn(c), 0);
   let avg = total / arr.length;
-  console.log(avg);
   return avg;
 }
 
@@ -19,18 +18,18 @@ function Toggle({ isOpen, setIsOpen }) {
   );
 }
 
-export default function Main({movieList}) {
+export default function Main({ watchedMovieList, children, selectedID }) {
   return (
     <main>
-      <ListBox movieList={movieList}/>
-      <WatchedBox movieList={movieList}/>
+      {children}
+      <WatchedBox movieList={watchedMovieList} selectedID={selectedID} />
     </main>
   );
 }
 
-function ListBox({movieList}) {
+export function ListBox({ children }) {
   const [isOpen, setIsOpen] = React.useState(true);
-   return (
+  return (
     <div className="box">
       <div
         style={{
@@ -43,92 +42,104 @@ function ListBox({movieList}) {
         <Toggle isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
 
-      {isOpen ? <MovieList movieList={movieList}/> : null}
+      {isOpen ? children : null}
     </div>
   );
 }
 
-function MovieList({movieList}) {
+function WatchedBox({ movieList, selectedID }) {
+  let [watchedMovieList, setWatchedMovieList] = React.useState(movieList);
+  const [isOpen, setIsOpen] = React.useState(true);
+  return (
+    <div className="box">
+      {selectedID ? (
+        <SelectedMovie selectedID={selectedID}/>
+      ) : (
+        <>
+          <StatBox
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            watchedMovieList={watchedMovieList}
+          >
+            <Toggle isOpen={isOpen} setIsOpen={setIsOpen} />
+          </StatBox>
+          <div style={{ marginBottom: "80px" }}></div>
+          {isOpen ? (
+            <WatchedMovieList watchedMovieList={watchedMovieList} />
+          ) : null}
+        </>
+      )}
+    </div>
+  );
+}
+
+function StatBox({ watchedMovieList, setWatchedMovieList, children }) {
+  return (
+    <div className="stat-box">
+      <div>
+        <h5>MOVIES YOU WATCHED</h5>
+        {children}
+      </div>
+      <div>
+        <span>#️⃣ {watchedMovieList.length} movies</span>
+        <span>⭐ {average(watchedMovieList, (movie) => movie.rating)}</span>
+        <span>🌟 9.5</span>
+        <span>
+          ⏳ {average(watchedMovieList, (movie) => movie.watchTimeMinutes)} mins
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export function MovieList({ movieList, setSelectedID }) {
   return (
     <ul>
-      {movieList.map((movies) => (
+      {movieList.map((movie) => (
         <Movie
-          key={movies.imdb}
-          posterUrl={movies.posterUrl}
-          name={movies.name}
-          year={movies.year}
-        />
+          key={movie.imdbID}
+          movie={movie}
+          setSelectedID={setSelectedID}
+        >
+          <h4>{movie.Title}</h4>
+          <span id="year">📅 {movie.Year}</span>
+        </Movie>
+      ))}
+    </ul>
+  );
+}
+function WatchedMovieList({ watchedMovieList }) {
+  return (
+    <ul>
+      {watchedMovieList.map((movie) => (
+        <Movie key={movie.imdb} posterUrl={movie.posterUrl} name={movie.name}>
+          <h4>{movie.name}</h4>
+          <span id="watched-movie-info">
+            <span>⭐ {movie.rating}</span>
+            <span>📆 {movie.year}</span>
+            <span>⏳ {movie.watchTimeMinutes} mins</span>
+          </span>
+        </Movie>
       ))}
     </ul>
   );
 }
 
-function Movie({ key, posterUrl, name, year }) {
+function handleSelect(id, setSelectedID){
+  setSelectedID(id);
+}
+
+function Movie({ movie, children, setSelectedID }) {
   return (
-    <li className="movie" key={key}>
-      <img src={posterUrl} alt={name} />
-      <div className="details">
-        <h4>{name}</h4>
-        <span id="year">📆 {year}</span>
-      </div>
+    <li onClick={() => handleSelect(movie.imdbID, setSelectedID)} className="movie">
+      <img src={movie.Poster === "N/A"
+              ? "https://lascrucesfilmfest.com/wp-content/uploads/2018/01/no-poster-available-737x1024.jpg"
+              : movie.Poster} alt={movie.Title} />
+      <div className="details">{children}</div>
     </li>
   );
 }
 
-function WatchedBox({movieList}) {
-  let [watchedMovieList, setWatchedMovieList] = React.useState(movieList);
-  const [isOpen, setIsOpen] = React.useState(true);
-  return (
-    <div className="box">
-      <StatBox isOpen={isOpen} setIsOpen={setIsOpen} watchedMovieList={watchedMovieList}/>
-      <div style={{ marginBottom: "80px" }}></div>
-      {isOpen ? <WatchedMovieList watchedMovieList={watchedMovieList}/> : null}
-    </div>
-  );
-}
-
-function StatBox({isOpen, setIsOpen, watchedMovieList, setWatchedMovieList}) {
-  return (
-    <div className="stat-box">
-      <div>
-        <h5>MOVIES YOU WATCHED</h5>
-        <Toggle isOpen={isOpen} setIsOpen={setIsOpen} />
-      </div>
-      <div>
-        <span>#️⃣ {watchedMovieList.length} movies</span>
-        <span>⭐ {average(watchedMovieList,'ratings')}</span>
-        <span>🌟 9.5</span>
-        <span>⏳ {average(watchedMovieList,'timings')} mins</span>
-      </div>
-    </div>
-  );
-}
-
-function WatchedMovieList({watchedMovieList}){
-  return(<ul>
-    {watchedMovieList.map((movie) => (
-      <WatchedMovie
-        key={movie.imdb}
-        posterUrl={movie.posterUrl}
-        name={movie.name}
-        year={movie.year}
-        rating={movie.rating}
-        watchTimeMinutes={movie.watchTimeMinutes}
-      />
-    ))}
-  </ul>);
-}
-
-function WatchedMovie({ key, posterUrl, name, year, rating, watchTimeMinutes }){
-  return <li className="movie" key={key}>
-      <img src={posterUrl} alt={name} />
-      <div className="details">
-        <h4>{name}</h4>
-        <span id="watched-movie-info">
-          <span>⭐ {rating}</span>
-          <span>📆 {year}</span>
-          <span>⏳ {watchTimeMinutes} mins</span>
-        </span>
-      </div>
-    </li>
+function SelectedMovie({ selectedID }) {
+  return <div className="selectedMovie">{selectedID}</div>;
 }

@@ -1,0 +1,17 @@
+#ratings{
+    background-color: green;
+    padding: 1rem;
+}
+
+.ratings{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 700;
+}
+
+.stars{
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}

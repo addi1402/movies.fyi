@@ -27,6 +27,7 @@ main {
     width: 20px;
     height: 20px;
     border-radius: 50%;
+    cursor: pointer;
   }  
 
 ul {
@@ -55,7 +56,8 @@ ul {
 }
 
 .movie img {
-  width: 35%;
+  width: 45%;
+  border-radius: 7px;
 }
 
 .stat-box{

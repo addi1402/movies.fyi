@@ -1,16 +1,16 @@
 import React from "react";
-import '../stylesheets/Navbar.css';
+import "../stylesheets/Navbar.css";
 import { GoSearch } from "react-icons/go";
 import { GoStarFill } from "react-icons/go";
 
-export default function Navbar() {
+export default function Navbar({children, query, setQuery, handleChange }) {
   return (
     <header>
       <div className="left-group">
         <Logo />
-        <SearchBar />
+        <SearchBar query={query} setQuery={setQuery} handleChange={handleChange}/>
       </div>
-      <Stats />
+      {children}
     </header>
   );
 }
@@ -24,8 +24,7 @@ function Logo() {
   );
 }
 
-function SearchBar() {
-  let [query, setQuery] = React.useState("");
+function SearchBar({query, setQuery, handleChange}) {
   return (
     <div id="query-box">
       <GoSearch id="search-icon" />
@@ -35,13 +34,13 @@ function SearchBar() {
         id="query"
         placeholder="Search Movies"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
+        onChange={(e) => handleChange(e)}
         autoComplete="off"
       />
     </div>
   );
 }
 
-function Stats() {
-  return <p>Found X results</p>;
+export function Stats(props) {
+  return <p>Found {props.movieList.length} results.</p>;
 }
