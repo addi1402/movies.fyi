@@ -126,7 +126,7 @@ export function MovieList({ movieList, setSelectedID }) {
   );
 }
 
-function handleAddMovie(movie, setWatchedMovieList) {
+function handleAddMovie(movie, setWatchedMovieList, setSelectedID) {
   const watchedMovie = {
     imdbID: movie.imdbID,
     Title: movie.Title,
@@ -136,7 +136,12 @@ function handleAddMovie(movie, setWatchedMovieList) {
     Runtime: Number(movie.Runtime.replace(" min", "")), 
   };
 
-  setWatchedMovieList((p) => [...p, watchedMovie]);
+  setWatchedMovieList((p) => {
+    let found = p.find((x) => x.imdbID === movie.imdbID);
+    if(!found) return [...p, watchedMovie]
+    else return p;
+  });
+  handleBack(setSelectedID);
 }
 
 function WatchedMovieList({ watchedMovieList }) {
@@ -215,7 +220,7 @@ function SelectedMovie({ selectedID, setSelectedID, setWatchedMovieList }) {
               <p>⭐ {movie.imdbRating} IMDB Rating</p>
             </div>
           </div>
-          <button onClick={() => handleAddMovie(movie, setWatchedMovieList)}>
+          <button onClick={() => handleAddMovie(movie, setWatchedMovieList, setSelectedID)}>
             Mark as Watched
           </button>
           <StarRating />
