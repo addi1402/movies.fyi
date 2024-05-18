@@ -1,5 +1,5 @@
 /* eslint-disable no-unreachable */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../stylesheets/Main.css";
 import { GoPlus } from "react-icons/go";
 import { GoDash } from "react-icons/go";
@@ -221,6 +221,16 @@ function SelectedMovie({
   const [movie, setMovie] = useState({});
   const [isLoading, setLoading] = useState(false);
   const [score, setScore] = useState(0);
+  let rateRef = useRef(0);
+
+  useEffect(() => {
+    rateRef.current = rateRef.current + 1; 
+    console.log(`Rated ${rateRef.current} times.`);
+  },[score]);
+
+  useEffect(() => {
+    rateRef.current = 0;
+  },[selectedID]);
 
   useEffect(() => {
     async function getMovie() {
