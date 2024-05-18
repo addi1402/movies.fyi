@@ -9,9 +9,9 @@ import StarRating from "./StarRating";
 import { Loader } from "../App";
 
 function average(arr, fn) {
-  if (arr.length === 0) return 0; 
+  if (arr.length === 0) return 0;
 
-  const validValues = arr.filter(item => !isNaN(fn(item))); 
+  const validValues = arr.filter((item) => !isNaN(fn(item)));
 
   if (validValues.length === 0) return 0;
 
@@ -63,8 +63,16 @@ export function ListBox({ children }) {
 }
 
 function WatchedBox({ selectedID, setSelectedID }) {
-  let [watchedMovieList, setWatchedMovieList] = React.useState([]);
+  let [watchedMovieList, setWatchedMovieList] = React.useState(function () {
+    let x = localStorage.getItem("watched");
+    return JSON.parse(x) || [];
+  });
   const [isOpen, setIsOpen] = React.useState(true);
+
+  useEffect(() => {
+    localStorage.setItem("watched", JSON.stringify(watchedMovieList));
+  }, [watchedMovieList]);
+
   return (
     <div className="box">
       {selectedID ? (
@@ -95,6 +103,7 @@ function WatchedBox({ selectedID, setSelectedID }) {
     </div>
   );
 }
+
 
 function StatBox({ watchedMovieList, setWatchedMovieList, children }) {
   return (
@@ -135,19 +144,22 @@ function handleAddMovie(movie, setWatchedMovieList, setSelectedID, score) {
     Title: movie.Title,
     Year: movie.Year,
     Poster: movie.Poster,
-    imdbRating: parseFloat(movie.imdbRating), 
-    Runtime: Number(movie.Runtime.replace(" min", "")), 
+    imdbRating: parseFloat(movie.imdbRating),
+    Runtime: Number(movie.Runtime.replace(" min", "")),
   };
 
   setWatchedMovieList((p) => {
     let found = p.find((x) => x.imdbID === movie.imdbID);
-    if(!found) return [...p, watchedMovie]
-    else return p;
+    if (!found) {
+      localStorage.setItem("watched", JSON.stringify([...p, watchedMovie]));
+      return [...p, watchedMovie];
+    } else return p;
   });
+
   handleBack(setSelectedID);
 }
 
-function handleDelete(id, setWatchedMovieList, watchedMovieList){
+function handleDelete(id, setWatchedMovieList, watchedMovieList) {
   let newList = watchedMovieList.filter((movie) => movie.imdbID !== id);
   setWatchedMovieList(newList);
 }
@@ -164,7 +176,11 @@ function WatchedMovieList({ watchedMovieList, setWatchedMovieList }) {
             <span>⏳ {movie.Runtime} mins</span>
             <span>🌟 {movie.userScore}/10</span>
           </span>
-          <GoTrash onClick={() => handleDelete(movie.imdbID, setWatchedMovieList, watchedMovieList)}/>
+          <GoTrash
+            onClick={() =>
+              handleDelete(movie.imdbID, setWatchedMovieList, watchedMovieList)
+            }
+          />
         </Movie>
       ))}
     </ul>
@@ -178,8 +194,10 @@ function handleSelect(id, setSelectedID) {
 function Movie({ movie, children, setSelectedID, clickable = true }) {
   return (
     <li
-      onClick={clickable ? () => handleSelect(movie.imdbID, setSelectedID) : null}
-      className={`movie ${clickable ? 'clickable' : 'non-clickable'}`}
+      onClick={
+        clickable ? () => handleSelect(movie.imdbID, setSelectedID) : null
+      }
+      className={`movie ${clickable ? "clickable" : "non-clickable"}`}
     >
       <img
         src={
@@ -194,16 +212,18 @@ function Movie({ movie, children, setSelectedID, clickable = true }) {
   );
 }
 
-
-function SelectedMovie({ selectedID, setSelectedID, setWatchedMovieList, watchedMovieList }) {
+function SelectedMovie({
+  selectedID,
+  setSelectedID,
+  setWatchedMovieList,
+  watchedMovieList,
+}) {
   const [movie, setMovie] = useState({});
   const [isLoading, setLoading] = useState(false);
   const [score, setScore] = useState(0);
 
   useEffect(() => {
-    
     async function getMovie() {
-      
       setLoading(true);
       let a = await fetch(
         `https://www.omdbapi.com/?apikey=8e082d08&i=${selectedID}`
@@ -219,13 +239,14 @@ function SelectedMovie({ selectedID, setSelectedID, setWatchedMovieList, watched
       }
     }
     getMovie();
-    return () =>   {document.title = 'Movies.fyi'}
-
+    return () => {
+      document.title = "Movies.fyi";
+    };
   }, [selectedID, watchedMovieList]);
 
   useEffect(() => {
     document.title = `Movie | ${movie.Title}`;
-  },[movie])
+  }, [movie]);
 
   const rated = watchedMovieList.find((m) => m.imdbID === movie.imdbID);
 
@@ -249,7 +270,11 @@ function SelectedMovie({ selectedID, setSelectedID, setWatchedMovieList, watched
             </div>
           </div>
           {!rated && score > 0 && (
-            <button onClick={() => handleAddMovie(movie, setWatchedMovieList, setSelectedID, score)}>
+            <button
+              onClick={() =>
+                handleAddMovie(movie, setWatchedMovieList, setSelectedID, score)
+              }
+            >
               Mark as Watched
             </button>
           )}
@@ -268,7 +293,6 @@ function SelectedMovie({ selectedID, setSelectedID, setWatchedMovieList, watched
     </div>
   );
 }
-
 
 function handleBack(setSelectedID) {
   setSelectedID(null);
