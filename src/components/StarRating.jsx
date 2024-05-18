@@ -12,11 +12,12 @@ const comments = [
 ];
 
 export default function StarRating({
-  maxRating = 5,
+  maxRating = 10,
   color = "gray",
   className = "",
+  score,
+  setScore
 }) {
-  const [score, setScore] = React.useState(1);
   const [hoverScore, setHoverScore] = React.useState(null);
 
   let textStyle = {

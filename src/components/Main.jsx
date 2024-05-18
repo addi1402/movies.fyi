@@ -4,6 +4,7 @@ import "../stylesheets/Main.css";
 import { GoPlus } from "react-icons/go";
 import { GoDash } from "react-icons/go";
 import { GoArrowLeft } from "react-icons/go";
+import { GoTrash } from "react-icons/go";
 import StarRating from "./StarRating";
 import { Loader } from "../App";
 
@@ -71,6 +72,7 @@ function WatchedBox({ selectedID, setSelectedID }) {
           selectedID={selectedID}
           setSelectedID={setSelectedID}
           setWatchedMovieList={setWatchedMovieList}
+          watchedMovieList={watchedMovieList}
         />
       ) : (
         <>
@@ -104,7 +106,7 @@ function StatBox({ watchedMovieList, setWatchedMovieList, children }) {
       <div>
         <span>#️⃣ {watchedMovieList.length} movies</span>
         <span>⭐ {average(watchedMovieList, (movie) => movie.imdbRating)}</span>
-        <span>🌟 No Value </span>
+        <span>🌟 {average(watchedMovieList, (movie) => movie.userScore)} </span>
         <span>
           ⏳ {average(watchedMovieList, (movie) => movie.Runtime)} mins
         </span>
@@ -126,9 +128,10 @@ export function MovieList({ movieList, setSelectedID }) {
   );
 }
 
-function handleAddMovie(movie, setWatchedMovieList, setSelectedID) {
+function handleAddMovie(movie, setWatchedMovieList, setSelectedID, score) {
   const watchedMovie = {
     imdbID: movie.imdbID,
+    userScore: score,
     Title: movie.Title,
     Year: movie.Year,
     Poster: movie.Poster,
@@ -144,17 +147,24 @@ function handleAddMovie(movie, setWatchedMovieList, setSelectedID) {
   handleBack(setSelectedID);
 }
 
-function WatchedMovieList({ watchedMovieList }) {
+function handleDelete(id, setWatchedMovieList, watchedMovieList){
+  let newList = watchedMovieList.filter((movie) => movie.imdbID !== id);
+  setWatchedMovieList(newList);
+}
+
+function WatchedMovieList({ watchedMovieList, setWatchedMovieList }) {
   return (
     <ul>
       {watchedMovieList.map((movie) => (
-        <Movie key={movie.imdbID} movie={movie}>
+        <Movie key={movie.imdbID} movie={movie} clickable={false}>
           <h4>{movie.Title}</h4>
           <span id="watched-movie-info">
             <span>⭐ {movie.imdbRating}</span>
             <span>📆 {movie.Year}</span>
             <span>⏳ {movie.Runtime} mins</span>
+            <span>🌟 {movie.userScore}/10</span>
           </span>
+          <GoTrash onClick={() => handleDelete(movie.imdbID, setWatchedMovieList, watchedMovieList)}/>
         </Movie>
       ))}
     </ul>
@@ -165,11 +175,11 @@ function handleSelect(id, setSelectedID) {
   setSelectedID(id);
 }
 
-function Movie({ movie, children, setSelectedID }) {
+function Movie({ movie, children, setSelectedID, clickable = true }) {
   return (
     <li
-      onClick={() => handleSelect(movie.imdbID, setSelectedID)}
-      className="movie"
+      onClick={clickable ? () => handleSelect(movie.imdbID, setSelectedID) : null}
+      className={`movie ${clickable ? 'clickable' : 'non-clickable'}`}
     >
       <img
         src={
@@ -184,12 +194,16 @@ function Movie({ movie, children, setSelectedID }) {
   );
 }
 
-function SelectedMovie({ selectedID, setSelectedID, setWatchedMovieList }) {
+
+function SelectedMovie({ selectedID, setSelectedID, setWatchedMovieList, watchedMovieList }) {
   const [movie, setMovie] = useState({});
   const [isLoading, setLoading] = useState(false);
+  const [score, setScore] = useState(0);
 
   useEffect(() => {
+    
     async function getMovie() {
+      
       setLoading(true);
       let a = await fetch(
         `https://www.omdbapi.com/?apikey=8e082d08&i=${selectedID}`
@@ -197,9 +211,23 @@ function SelectedMovie({ selectedID, setSelectedID, setWatchedMovieList }) {
       let b = await a.json();
       setMovie(b);
       setLoading(false);
+
+      // Check if the movie has been rated before and set the score
+      let ratedMovie = watchedMovieList.find((m) => m.imdbID === b.imdbID);
+      if (ratedMovie) {
+        setScore(ratedMovie.userScore);
+      }
     }
     getMovie();
-  }, [selectedID]);
+    return () =>   {document.title = 'Movies.fyi'}
+
+  }, [selectedID, watchedMovieList]);
+
+  useEffect(() => {
+    document.title = `Movie | ${movie.Title}`;
+  },[movie])
+
+  const rated = watchedMovieList.find((m) => m.imdbID === movie.imdbID);
 
   return (
     <div className="selectedMovie">
@@ -220,10 +248,16 @@ function SelectedMovie({ selectedID, setSelectedID, setWatchedMovieList }) {
               <p>⭐ {movie.imdbRating} IMDB Rating</p>
             </div>
           </div>
-          <button onClick={() => handleAddMovie(movie, setWatchedMovieList, setSelectedID)}>
-            Mark as Watched
-          </button>
-          <StarRating />
+          {!rated && score > 0 && (
+            <button onClick={() => handleAddMovie(movie, setWatchedMovieList, setSelectedID, score)}>
+              Mark as Watched
+            </button>
+          )}
+          {!rated ? (
+            <StarRating score={score} setScore={setScore} />
+          ) : (
+            <p>You have rated the movie as {rated.userScore}/10.</p>
+          )}
           <div className="movie-info">
             <p>{movie.Plot}</p>
             <p>{movie.Actors}</p>
@@ -234,6 +268,7 @@ function SelectedMovie({ selectedID, setSelectedID, setWatchedMovieList }) {
     </div>
   );
 }
+
 
 function handleBack(setSelectedID) {
   setSelectedID(null);

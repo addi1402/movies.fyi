@@ -21,6 +21,7 @@ export default function App() {
 
 
   React.useEffect(() => {
+    let controller = new AbortController();
     async function fetchData() {
       if(!query) return;
       try {
@@ -28,7 +29,7 @@ export default function App() {
         setIsLoading(true);
 
         let res = await fetch(
-          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
+          `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`,{signal: controller.signal}
         );
         
         // Handling no internet connectivity
@@ -58,6 +59,7 @@ export default function App() {
     }
 
     fetchData();
+    return () => controller.abort();
   }, [query]);
 
   return (
